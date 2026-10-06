@@ -4,111 +4,124 @@ using TMPro;
 public class ScenarioManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text scenarioText;
-    [SerializeField] private float textSpeed = 0.05f;
+    [SerializeField] private GameObject choicePanel;
 
-    // シナリオ
-    private string[] scenario =
-    {
-        "宇宙船は静かに航行していた。\n",
-        "地球への帰還まで、あと三日。\n\n",
-        "乗組員は全部で十二人。\n\n",
-        "そして、この中の誰かが――。"
-    };
+    [SerializeField] private TMP_Text choiceAText;
+    [SerializeField] private TMP_Text choiceBText;
+    [SerializeField] private TMP_Text choiceCText;
 
-    private int currentIndex = 0;
+    [SerializeField] private ScenarioDatabase database;
 
-    private bool isTyping = false;
-    private bool textFinished = false;
+    [SerializeField] private string startNodeID = "START";
 
-    // これまで表示した文章
-    private string displayedText = "";
+    [SerializeField] private FlagManager flagManager;
+
+    private ScenarioNode currentNode;
+
+    private bool isTyping;
+    private bool textFinished;
 
     private void Start()
     {
-        ShowText();
+        choicePanel.SetActive(false);
+        LoadNode(startNodeID);
     }
 
     private void Update()
     {
+        if (choicePanel.activeSelf)
+            return;
+
         if (Input.GetMouseButtonDown(0))
         {
-            // 文字を表示中
             if (isTyping)
             {
                 StopAllCoroutines();
 
-                displayedText += scenario[currentIndex];
-                scenarioText.text = displayedText;
+                scenarioText.text = currentNode.text;
 
                 isTyping = false;
                 textFinished = true;
             }
-            // 文字を表示し終わっている
-            else if (textFinished)
-            {
-                currentIndex++;
-
-                if (currentIndex < scenario.Length)
-                {
-                    ShowText();
-                }
-                else
-                {
-                    Debug.Log("シナリオ終了");
-                }
-            }
         }
     }
 
-    // 次の文章を表示
-    private void ShowText()
+    public void LoadNode(string nodeID)
     {
-        scenarioText.text = displayedText;
+        currentNode = database.GetNode(nodeID);
+
+        if (currentNode == null)
+            return;
+        if (!string.IsNullOrEmpty(currentNode.setFlag))
+        {
+            flagManager.SetFlag(currentNode.setFlag);
+        }
+
+        scenarioText.text = "";
+
+        choicePanel.SetActive(false);
 
         StartCoroutine(TypeText());
     }
 
-    // 文字を1文字ずつ表示
     private System.Collections.IEnumerator TypeText()
     {
         isTyping = true;
+        textFinished = false;
 
-        string text = scenario[currentIndex];
-        string currentText = "";
-
-        foreach (char letter in text)
+        foreach (char letter in currentNode.text)
         {
-            currentText += letter;
+            scenarioText.text += letter;
 
-            scenarioText.text = displayedText + currentText;
-
-            yield return new WaitForSeconds(textSpeed);
+            yield return new WaitForSeconds(0.05f);
         }
-
-        displayedText += text;
-
-        scenarioText.text = displayedText;
 
         isTyping = false;
         textFinished = true;
+
+        ShowChoices();
     }
 
-    // 選択肢が選ばれたとき
-    public void SelectChoice(int choice)
+    private void ShowChoices()
     {
-        switch (choice)
+        if (currentNode.choices == null || currentNode.choices.Count == 0)
+            return;
+
+        choiceAText.gameObject.SetActive(false);
+        choiceBText.gameObject.SetActive(false);
+        choiceCText.gameObject.SetActive(false);
+
+        if (currentNode.choices.Count >= 1)
         {
-            case 0:
-                Debug.Log("A：食堂に行く");
-                break;
-
-            case 1:
-                Debug.Log("B：操縦室へ行く");
-                break;
-
-            case 2:
-                Debug.Log("C：自室に戻る");
-                break;
+            choiceAText.text = currentNode.choices[0].choiceText;
+            choiceAText.gameObject.SetActive(true);
         }
+
+        if (currentNode.choices.Count >= 2)
+        {
+            choiceBText.text = currentNode.choices[1].choiceText;
+            choiceBText.gameObject.SetActive(true);
+        }
+
+        if (currentNode.choices.Count >= 3)
+        {
+            choiceCText.text = currentNode.choices[2].choiceText;
+            choiceCText.gameObject.SetActive(true);
+        }
+
+        choicePanel.SetActive(true);
+    }
+
+    public void SelectChoice(int choiceIndex)
+    {
+        if (currentNode == null)
+            return;
+
+        if (choiceIndex < 0 || choiceIndex >= currentNode.choices.Count)
+            return;
+
+        string nextNodeID = currentNode.choices[choiceIndex].nextNodeID;
+
+        LoadNode(nextNodeID);
     }
 }
