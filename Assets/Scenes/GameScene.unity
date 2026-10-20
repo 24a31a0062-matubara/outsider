@@ -444,8 +444,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 100
-  m_fontSizeBase: 100
+  m_fontSize: 80
+  m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -713,8 +713,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonText: {fileID: 1475686449}
-  normalSize: 100
-  hoverSize: 120
+  normalSize: 80
+  hoverSize: 100
 --- !u!222 &409786141
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -757,6 +757,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7686d3c2e9868d24e8e4b922d5a91212, type: 2}
   - {fileID: 11400000, guid: 2713b07e069ad5e40b965ca49aada492, type: 2}
   - {fileID: 11400000, guid: e297f5e1ee8006d49be1eeb536e3688a, type: 2}
+  - {fileID: 11400000, guid: 5435228f82868804091cd9f8e3431041, type: 2}
+  - {fileID: 11400000, guid: 45c5112907847cf46903b39db1fcb583, type: 2}
+  - {fileID: 11400000, guid: 5f56effaab2279541a489e1ca231b6dd, type: 2}
+  flagManager: {fileID: 1683181879}
 --- !u!4 &422417663
 Transform:
   m_ObjectHideFlags: 0
@@ -986,8 +990,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonText: {fileID: 1033585609}
-  normalSize: 100
-  hoverSize: 120
+  normalSize: 80
+  hoverSize: 100
 --- !u!222 &638397303
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1214,8 +1218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonText: {fileID: 279165661}
-  normalSize: 100
-  hoverSize: 120
+  normalSize: 80
+  hoverSize: 100
 --- !u!222 &815257734
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1308,8 +1312,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 100
-  m_fontSizeBase: 100
+  m_fontSize: 80
+  m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1444,8 +1448,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 100
-  m_fontSizeBase: 100
+  m_fontSize: 80
+  m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1525,6 +1529,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39ecc67a1066eac479ca80ba7b4e9a46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registeredFlags:
+  - VisitedDining
+  - FoundPanelRecord
+  - HeardAlibi
 --- !u!4 &1683181880
 Transform:
   m_ObjectHideFlags: 0
@@ -1726,8 +1734,9 @@ MonoBehaviour:
   choiceBText: {fileID: 279165661}
   choiceCText: {fileID: 1033585609}
   database: {fileID: 422417662}
-  startNodeID: START
   flagManager: {fileID: 1683181879}
+  startNodeID: START
+  textSpeed: 0.05
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

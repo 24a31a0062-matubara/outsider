@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeID: DINING
   text: "\u3042\u306A\u305F\u306F\u98DF\u5802\u3078\u5411\u304B\u3063\u305F\u3002"
+  progressType: 0
   choices: []
-  setFlag: keyget
+  setFlag: 

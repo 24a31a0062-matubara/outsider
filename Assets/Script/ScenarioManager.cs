@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
+using System.Collections.Generic;
 
 public class ScenarioManager : MonoBehaviour
 {
@@ -11,12 +13,13 @@ public class ScenarioManager : MonoBehaviour
     [SerializeField] private TMP_Text choiceCText;
 
     [SerializeField] private ScenarioDatabase database;
-
-    [SerializeField] private string startNodeID = "START";
-
     [SerializeField] private FlagManager flagManager;
 
+    [SerializeField] private string startNodeID = "START";
+    [SerializeField] private float textSpeed = 0.05f;
+
     private ScenarioNode currentNode;
+    private List<ScenarioChoice> availableChoices = new List<ScenarioChoice>();
 
     private bool isTyping;
     private bool textFinished;
@@ -32,39 +35,54 @@ public class ScenarioManager : MonoBehaviour
         if (choicePanel.activeSelf)
             return;
 
-        if (Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButtonDown(0))
+            return;
+
+        if (isTyping)
         {
-            if (isTyping)
+            StopAllCoroutines();
+            scenarioText.text = currentNode.text;
+
+            isTyping = false;
+            textFinished = true;
+
+            // 文字送りを飛ばした場合も進行方式を反映する
+            OnTextFinished();
+        }
+        else if (textFinished)
+        {
+            // クリックで次へ進む設定の場合のみ移動する
+            if (currentNode.progressType == NodeProgressType.ClickToContinue)
             {
-                StopAllCoroutines();
-
-                scenarioText.text = currentNode.text;
-
-                isTyping = false;
-                textFinished = true;
+                ContinueToNextNode();
             }
         }
     }
 
     public void LoadNode(string nodeID)
     {
+        StopAllCoroutines();
+
         currentNode = database.GetNode(nodeID);
 
         if (currentNode == null)
             return;
+
         if (!string.IsNullOrEmpty(currentNode.setFlag))
         {
             flagManager.SetFlag(currentNode.setFlag);
         }
 
         scenarioText.text = "";
-
         choicePanel.SetActive(false);
+
+        isTyping = false;
+        textFinished = false;
 
         StartCoroutine(TypeText());
     }
 
-    private System.Collections.IEnumerator TypeText()
+    private IEnumerator TypeText()
     {
         isTyping = true;
         textFinished = false;
@@ -72,55 +90,140 @@ public class ScenarioManager : MonoBehaviour
         foreach (char letter in currentNode.text)
         {
             scenarioText.text += letter;
-
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(textSpeed);
         }
 
         isTyping = false;
         textFinished = true;
 
-        ShowChoices();
+        OnTextFinished();
+    }
+
+    private void OnTextFinished()
+    {
+        switch (currentNode.progressType)
+        {
+            case NodeProgressType.Choices:
+                ShowChoices();
+                break;
+
+            case NodeProgressType.ClickToContinue:
+                choicePanel.SetActive(false);
+                break;
+
+            case NodeProgressType.Stop:
+                choicePanel.SetActive(false);
+                break;
+        }
     }
 
     private void ShowChoices()
     {
-        if (currentNode.choices == null || currentNode.choices.Count == 0)
-            return;
+        availableChoices.Clear();
+
+        if (currentNode.choices != null)
+        {
+            foreach (ScenarioChoice choice in currentNode.choices)
+            {
+                if (choice == null)
+                    continue;
+
+                bool conditionsMet = true;
+
+                if (choice.requiredFlags != null)
+                {
+                    foreach (string requiredFlag in choice.requiredFlags)
+                    {
+                        if (!flagManager.HasFlag(requiredFlag))
+                        {
+                            conditionsMet = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (conditionsMet)
+                {
+                    availableChoices.Add(choice);
+                }
+            }
+        }
 
         choiceAText.gameObject.SetActive(false);
         choiceBText.gameObject.SetActive(false);
         choiceCText.gameObject.SetActive(false);
 
-        if (currentNode.choices.Count >= 1)
+        if (availableChoices.Count == 0)
         {
-            choiceAText.text = currentNode.choices[0].choiceText;
+            choicePanel.SetActive(false);
+            return;
+        }
+
+        if (availableChoices.Count >= 1)
+        {
+            choiceAText.text = availableChoices[0].choiceText;
             choiceAText.gameObject.SetActive(true);
         }
 
-        if (currentNode.choices.Count >= 2)
+        if (availableChoices.Count >= 2)
         {
-            choiceBText.text = currentNode.choices[1].choiceText;
+            choiceBText.text = availableChoices[1].choiceText;
             choiceBText.gameObject.SetActive(true);
         }
 
-        if (currentNode.choices.Count >= 3)
+        if (availableChoices.Count >= 3)
         {
-            choiceCText.text = currentNode.choices[2].choiceText;
+            choiceCText.text = availableChoices[2].choiceText;
             choiceCText.gameObject.SetActive(true);
         }
 
         choicePanel.SetActive(true);
     }
 
+    private void ContinueToNextNode()
+    {
+        if (currentNode == null || currentNode.choices == null)
+            return;
+
+        // クリック進行では、条件を満たす最初の選択肢へ進む
+        availableChoices.Clear();
+
+        foreach (ScenarioChoice choice in currentNode.choices)
+        {
+            if (choice == null)
+                continue;
+
+            bool conditionsMet = true;
+
+            if (choice.requiredFlags != null)
+            {
+                foreach (string requiredFlag in choice.requiredFlags)
+                {
+                    if (!flagManager.HasFlag(requiredFlag))
+                    {
+                        conditionsMet = false;
+                        break;
+                    }
+                }
+            }
+
+            if (conditionsMet)
+            {
+                LoadNode(choice.nextNodeID);
+                return;
+            }
+        }
+
+        // 条件を満たす移動先がなければ停止する
+        Debug.Log("次へ進める選択肢がありません: " + currentNode.nodeID);
+    }
+
     public void SelectChoice(int choiceIndex)
     {
-        if (currentNode == null)
+        if (choiceIndex < 0 || choiceIndex >= availableChoices.Count)
             return;
 
-        if (choiceIndex < 0 || choiceIndex >= currentNode.choices.Count)
-            return;
-
-        string nextNodeID = currentNode.choices[choiceIndex].nextNodeID;
+        string nextNodeID = availableChoices[choiceIndex].nextNodeID;
 
         LoadNode(nextNodeID);
     }

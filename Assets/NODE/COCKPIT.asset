@@ -14,4 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeID: COCKPIT
   text: "\u3042\u306A\u305F\u306F\u64CD\u7E26\u5BA4\u3078\u5411\u304B\u3063\u305F\u3002"
-  choices: []
+  progressType: 0
+  choices:
+  - choiceText: "\u64CD\u4F5C\u30D1\u30CD\u30EB\u3092\u898B\u308B"
+    nextNodeID: PANEL
+    requiredFlags: []
+  - choiceText: "\u4E57\u7D44\u54E1\u306E\u8A3C\u8A00\u3092\u805E\u304F"
+    nextNodeID: ALIBI
+    requiredFlags: []
+  - choiceText: "\u767A\u898B\u3057\u305F\u8A18\u9332\u306B\u3064\u3044\u3066\u8003\u3048\u308B"
+    nextNodeID: THINK_PERSON
+    requiredFlags:
+    - FoundPanelRecord
+    - HeardAlibi
+  setFlag: VisitedDining

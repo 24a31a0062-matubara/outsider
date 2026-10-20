@@ -14,4 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeID: ROOM
   text: "\u3042\u306A\u305F\u306F\u81EA\u5BA4\u3078\u623B\u3063\u305F\u3002"
-  choices: []
+  progressType: 2
+  choices:
+  - choiceText: "\u64CD\u7E26\u5BA4\u306B\u623B\u308B"
+    nextNodeID: COCKPIT
+    requiredFlags: []
+  setFlag: 
+  isEnding: 0
