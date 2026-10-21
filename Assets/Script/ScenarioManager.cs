@@ -21,6 +21,12 @@ public class ScenarioManager : MonoBehaviour
     private ScenarioNode currentNode;
     private List<ScenarioChoice> availableChoices = new List<ScenarioChoice>();
 
+    // 訪問済みノードを記録する
+    private HashSet<string> visitedNodes = new HashSet<string>();
+
+    // 現在表示する文章
+    private string currentText;
+
     private bool isTyping;
     private bool textFinished;
 
@@ -41,7 +47,8 @@ public class ScenarioManager : MonoBehaviour
         if (isTyping)
         {
             StopAllCoroutines();
-            scenarioText.text = currentNode.text;
+
+            scenarioText.text = currentText;
 
             isTyping = false;
             textFinished = true;
@@ -68,9 +75,35 @@ public class ScenarioManager : MonoBehaviour
         if (currentNode == null)
             return;
 
+        // 初回訪問かどうかを判定する
+        bool isFirstVisit = visitedNodes.Add(nodeID);
+
+        // 基本は通常の文章を使う
+        currentText = currentNode.text;
+
+        // 2回目以降で再訪問用の文章が設定されていれば切り替える
+        if (!isFirstVisit &&
+            !string.IsNullOrEmpty(currentNode.revisitText))
+        {
+            currentText = currentNode.revisitText;
+        }
+
         if (!string.IsNullOrEmpty(currentNode.setFlag))
         {
             flagManager.SetFlag(currentNode.setFlag);
+        }
+
+        if (currentNode.isEnding)
+        {
+            if (!string.IsNullOrEmpty(currentNode.endingFlag))
+            {
+                flagManager.SetFlag(currentNode.endingFlag);
+
+                Debug.Log(
+                    "エンディングを記録しました: " +
+                    currentNode.endingFlag
+                );
+            }
         }
 
         scenarioText.text = "";
@@ -87,7 +120,7 @@ public class ScenarioManager : MonoBehaviour
         isTyping = true;
         textFinished = false;
 
-        foreach (char letter in currentNode.text)
+        foreach (char letter in currentText)
         {
             scenarioText.text += letter;
             yield return new WaitForSeconds(textSpeed);
@@ -125,8 +158,7 @@ public class ScenarioManager : MonoBehaviour
         {
             foreach (ScenarioChoice choice in currentNode.choices)
             {
-                if (choice == null)
-                    continue;
+                if (choice == null) continue;
 
                 bool conditionsMet = true;
 
@@ -190,8 +222,7 @@ public class ScenarioManager : MonoBehaviour
 
         foreach (ScenarioChoice choice in currentNode.choices)
         {
-            if (choice == null)
-                continue;
+            if (choice == null) continue;
 
             bool conditionsMet = true;
 
@@ -215,7 +246,10 @@ public class ScenarioManager : MonoBehaviour
         }
 
         // 条件を満たす移動先がなければ停止する
-        Debug.Log("次へ進める選択肢がありません: " + currentNode.nodeID);
+        Debug.Log(
+            "次へ進める選択肢がありません: " +
+            currentNode.nodeID
+        );
     }
 
     public void SelectChoice(int choiceIndex)
@@ -228,3 +262,4 @@ public class ScenarioManager : MonoBehaviour
         LoadNode(nextNodeID);
     }
 }
+

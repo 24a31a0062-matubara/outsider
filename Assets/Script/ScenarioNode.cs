@@ -3,9 +3,9 @@ using UnityEngine;
 
 public enum NodeProgressType
 {
-    Choices,        // 選択肢を表示する
-    ClickToContinue, // クリックで次へ進む
-    Stop            // その場で停止する
+    Choices,
+    ClickToContinue,
+    Stop
 }
 
 [System.Serializable]
@@ -26,6 +26,10 @@ public class ScenarioNode : ScriptableObject
     [TextArea(3, 10)]
     public string text;
 
+    [Header("再訪問時の文章（空欄なら通常の文章）")]
+    [TextArea(3, 10)]
+    public string revisitText;
+
     [Header("文章を読み終えた後の動作")]
     public NodeProgressType progressType = NodeProgressType.Choices;
 
@@ -37,6 +41,7 @@ public class ScenarioNode : ScriptableObject
 
     [Header("エンディング設定")]
     public bool isEnding = false;
+    public string endingFlag = "EndingASeen";
 
     [ContextMenu("このノードの設定を検査")]
     public void ValidateNode()
@@ -54,21 +59,22 @@ public class ScenarioNode : ScriptableObject
         {
             Debug.LogWarning(
                 nodeID + "：選択肢を表示する設定ですが、選択肢がありません。",
-                this);
+                this
+            );
         }
 
         if (choices != null)
         {
             foreach (ScenarioChoice choice in choices)
             {
-                if (choice == null)
-                    continue;
+                if (choice == null) continue;
 
                 if (string.IsNullOrWhiteSpace(choice.choiceText))
                 {
                     Debug.LogWarning(
                         nodeID + "：選択肢の文章が空欄です。",
-                        this);
+                        this
+                    );
                 }
 
                 if (string.IsNullOrWhiteSpace(choice.nextNodeID))
@@ -76,12 +82,13 @@ public class ScenarioNode : ScriptableObject
                     Debug.LogError(
                         nodeID + "：「" + choice.choiceText +
                         "」の移動先が空欄です。",
-                        this);
+                        this
+                    );
+
                     hasError = true;
                 }
 
-                if (choice.requiredFlags == null)
-                    continue;
+                if (choice.requiredFlags == null) continue;
 
                 foreach (string flag in choice.requiredFlags)
                 {
@@ -90,7 +97,8 @@ public class ScenarioNode : ScriptableObject
                         Debug.LogWarning(
                             nodeID + "：「" + choice.choiceText +
                             "」に空欄のRequired Flagがあります。",
-                            this);
+                            this
+                        );
                     }
                 }
             }
@@ -98,7 +106,11 @@ public class ScenarioNode : ScriptableObject
 
         if (!hasError)
         {
-            Debug.Log(nodeID + "：ノード内の基本設定を検査しました。", this);
+            Debug.Log(
+                nodeID + "：ノード内の基本設定を検査しました。",
+                this
+            );
         }
     }
 }
+

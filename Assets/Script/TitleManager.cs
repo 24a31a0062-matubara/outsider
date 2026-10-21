@@ -15,6 +15,12 @@ public class TitleManager : MonoBehaviour
         Debug.Log("CONTINUE‚Í‚Ü‚¾ŽÀ‘•‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
     }
 
+    // ENDING LIST
+    public void OpenEndingList()
+    {
+        SceneManager.LoadScene("ENDScene");
+    }
+
     // SETTINGS
     public void OpenSettings()
     {

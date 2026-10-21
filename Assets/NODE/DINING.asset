@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeID: DINING
   text: "\u3042\u306A\u305F\u306F\u98DF\u5802\u3078\u5411\u304B\u3063\u305F\u3002"
+  revisitText: "\u518D\u3073\u98DF\u5802\u306B\u623B\u3063\u3066\u304D\u305F\u3002"
   progressType: 0
   choices: []
   setFlag: 
+  isEnding: 0
+  endingFlag: EndingASeen

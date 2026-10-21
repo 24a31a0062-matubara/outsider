@@ -20,3 +20,5 @@ MonoBehaviour:
     nextNodeID: COCKPIT
     requiredFlags: []
   setFlag: HeardAlibi
+  isEnding: 0
+  endingFlag: EndingASeen

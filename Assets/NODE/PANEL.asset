@@ -20,3 +20,5 @@ MonoBehaviour:
     nextNodeID: COCKPIT
     requiredFlags: []
   setFlag: FoundPanelRecord
+  isEnding: 1
+  endingFlag: EndingASeen
