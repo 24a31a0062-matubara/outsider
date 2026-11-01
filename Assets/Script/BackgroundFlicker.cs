@@ -1,45 +1,102 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+using System.Collections.Generic;
 
-public class BackgroundFlicker : MonoBehaviour
+public class FilmDamageMotion : MonoBehaviour
 {
-    [SerializeField] private Image background;
+    [Header("ÉtÉBÉãÉÄÇÃèù")]
+    [SerializeField] private float scratchSpeed = 8f;
+    [SerializeField] private float scratchJitter = 1f;
 
-    [SerializeField] private float minTime = 0.1f;
-    [SerializeField] private float maxTime = 0.3f;
+    [Header("ö∫")]
+    [SerializeField] private float dustSpeed = 12f;
+    [SerializeField] private float dustJitter = 3f;
+
+    [Header("à⁄ìÆîÕàÕ")]
+    [SerializeField] private float screenHeight = 1080f;
+
+    private class FilmParticle
+    {
+        public RectTransform rect;
+        public float speed;
+        public float phase;
+        public float jitter;
+        public bool isDust;
+        public float originalX;
+        public float currentY;
+    }
+
+    private readonly List<FilmParticle> particles =
+        new List<FilmParticle>();
 
     private void Start()
     {
-        StartCoroutine(Flicker());
+        InitializeParticles();
     }
 
-    private IEnumerator Flicker()
+    private void InitializeParticles()
     {
-        while (true)
+        particles.Clear();
+
+        foreach (RectTransform child in
+                 GetComponentsInChildren<RectTransform>())
         {
-            background.color = Color.white;
+            if (child == transform)
+                continue;
 
-            yield return new WaitForSeconds(
-                Random.Range(1.5f, 4.0f)
-            );
+            bool isDust = child.name.StartsWith("Dust");
+            bool isScratch = child.name.StartsWith("Scratch");
 
-            background.color = Color.black;
+            if (!isDust && !isScratch)
+                continue;
 
-            yield return new WaitForSeconds(0.05f);
+            FilmParticle particle = new FilmParticle();
 
-            background.color = Color.white;
+            particle.rect = child;
+            particle.isDust = isDust;
 
-            if (Random.value < 0.4f)
+            particle.speed = isDust
+                ? Random.Range(dustSpeed * 0.5f, dustSpeed * 1.5f)
+                : Random.Range(scratchSpeed * 0.5f, scratchSpeed * 1.5f);
+
+            particle.jitter = isDust
+                ? dustJitter
+                : scratchJitter;
+
+            particle.phase = Random.Range(0f, 100f);
+            particle.originalX = child.anchoredPosition.x;
+            particle.currentY = child.anchoredPosition.y;
+
+            particles.Add(particle);
+        }
+    }
+
+    private void Update()
+    {
+        float halfHeight = screenHeight / 2f;
+
+        foreach (FilmParticle particle in particles)
+        {
+            if (particle.rect == null)
+                continue;
+
+            // ècï˚å¸Ç…à⁄ìÆ
+            particle.currentY -= particle.speed * Time.deltaTime;
+
+            // âÊñ â∫Ç‹Ç≈à⁄ìÆÇµÇΩÇÁè„Ç…ñﬂÇ∑
+            if (particle.currentY < -halfHeight)
             {
-                yield return new WaitForSeconds(0.08f);
-
-                background.color = Color.black;
-
-                yield return new WaitForSeconds(0.04f);
-
-                background.color = Color.white;
+                particle.currentY = halfHeight;
             }
+
+            // ç∂âEÇ…ÇÌÇ∏Ç©Ç…óhÇÁÇ∑
+            float horizontalMovement =
+                Mathf.Sin(Time.time * 0.7f + particle.phase)
+                * particle.jitter;
+
+            particle.rect.anchoredPosition = new Vector2(
+                particle.originalX + horizontalMovement,
+                particle.currentY
+            );
         }
     }
 }
