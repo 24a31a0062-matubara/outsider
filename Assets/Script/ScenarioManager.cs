@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,20 +6,20 @@ using System.Text.RegularExpressions;
 
 public class ScenarioManager : MonoBehaviour
 {
-    [Header("•¶Í•\¦")]
+    [Header("æ–‡ç« è¡¨ç¤º")]
     [SerializeField] private TMP_Text scenarioText;
     [SerializeField] private GameObject choicePanel;
 
-    [Header("‘I‘ğˆ")]
+    [Header("é¸æŠè‚¢")]
     [SerializeField] private TMP_Text choiceAText;
     [SerializeField] private TMP_Text choiceBText;
     [SerializeField] private TMP_Text choiceCText;
 
-    [Header("ƒf[ƒ^")]
+    [Header("ãƒ‡ãƒ¼ã‚¿")]
     [SerializeField] private ScenarioDatabase database;
     [SerializeField] private FlagManager flagManager;
 
-    [Header("İ’è")]
+    [Header("è¨­å®š")]
     [SerializeField] private string startNodeID = "START";
     [SerializeField] private float textSpeed = 0.05f;
     [SerializeField] private float clickCooldown = 0.2f;
@@ -63,13 +63,13 @@ public class ScenarioManager : MonoBehaviour
         if (!Input.GetMouseButtonDown(0))
             return;
 
-        // ƒNƒŠƒbƒN˜A‘Å‚É‚æ‚é˜A‘±is‚ğ–h~
+        // ã‚¯ãƒªãƒƒã‚¯é€£æ‰“ã«ã‚ˆã‚‹é€£ç¶šé€²è¡Œã‚’é˜²æ­¢
         if (Time.unscaledTime - lastClickTime < clickCooldown)
             return;
 
         lastClickTime = Time.unscaledTime;
 
-        // •¶Í•\¦’†‚È‚çA‰Â”\‚È”ÍˆÍ‚Ü‚Åˆê‹C‚É•\¦
+        // æ–‡ç« è¡¨ç¤ºä¸­ãªã‚‰ã€å¯èƒ½ãªç¯„å›²ã¾ã§ä¸€æ°—ã«è¡¨ç¤º
         if (isTyping)
         {
             CompleteCurrentSentence();
@@ -79,7 +79,7 @@ public class ScenarioManager : MonoBehaviour
         if (!waitingForClick)
             return;
 
-        // Ÿ‚Ìƒy[ƒW‚Öi‚Ş
+        // æ¬¡ã®ãƒšãƒ¼ã‚¸ã¸é€²ã‚€
         if (waitingForNextPage)
         {
             currentPageText = "";
@@ -92,14 +92,14 @@ public class ScenarioManager : MonoBehaviour
             return;
         }
 
-        // Ÿ‚Ì•¶Í‚Öi‚Ş
+        // æ¬¡ã®æ–‡ç« ã¸é€²ã‚€
         if (currentSentenceIndex < sentences.Count)
         {
             ShowNextSentence();
             return;
         }
 
-        // ƒm[ƒh‚Ìis
+        // ãƒãƒ¼ãƒ‰ã®é€²è¡Œ
         if (currentNode.progressType == NodeProgressType.ClickToContinue)
         {
             ContinueToNextNode();
@@ -118,7 +118,7 @@ public class ScenarioManager : MonoBehaviour
 
         if (currentNode == null)
         {
-            Debug.LogError("ƒm[ƒh‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: " + nodeID);
+            Debug.LogError("ãƒãƒ¼ãƒ‰ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“: " + nodeID);
             return;
         }
 
@@ -143,7 +143,7 @@ public class ScenarioManager : MonoBehaviour
             flagManager.SetFlag(currentNode.endingFlag);
 
             Debug.Log(
-                "ƒGƒ“ƒfƒBƒ“ƒO‚ğ‹L˜^‚µ‚Ü‚µ‚½: " +
+                "ã‚¨ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã‚’è¨˜éŒ²ã—ã¾ã—ãŸ: " +
                 currentNode.endingFlag
             );
         }
@@ -170,6 +170,8 @@ public class ScenarioManager : MonoBehaviour
             FinishNodeText();
     }
 
+    // æ–‡ç« ã‚’å¥èª­ç‚¹ã”ã¨ã«åˆ†å‰²ã™ã‚‹
+    // é–‰ã˜ã‚«ãƒƒã‚³ã¯ç›´å‰ã®æ–‡ç« ã«å«ã‚ã‚‹
     private List<string> SplitIntoSentences(string text)
     {
         List<string> result = new List<string>();
@@ -177,17 +179,64 @@ public class ScenarioManager : MonoBehaviour
         if (string.IsNullOrEmpty(text))
             return result;
 
-        MatchCollection matches = Regex.Matches(
-            text,
-            @"[^BIH!?]+[BIH!?]*"
-        );
+        string current = "";
 
-        foreach (Match match in matches)
+        Stack<char> quoteStack = new Stack<char>();
+
+        foreach (char character in text)
         {
-            string sentence = match.Value.Trim();
+            current += character;
 
-            if (!string.IsNullOrEmpty(sentence))
-                result.Add(sentence);
+            // æ‹¬å¼§ã®é–‹å§‹
+            if (character == 'ã€Œ' ||
+                character == 'ã€')
+            {
+                quoteStack.Push(character);
+                continue;
+            }
+
+            // æ‹¬å¼§ã®çµ‚äº†
+            if (character == 'ã€' ||
+                character == 'ã€')
+            {
+                if (quoteStack.Count > 0)
+                {
+                    char openingQuote = quoteStack.Peek();
+
+                    // å¯¾å¿œã™ã‚‹é–‰ã˜æ‹¬å¼§ã®å ´åˆã ã‘é–‰ã˜ã‚‹
+                    if ((openingQuote == 'ã€Œ' && character == 'ã€') ||
+                        (openingQuote == 'ã€' && character == 'ã€'))
+                    {
+                        quoteStack.Pop();
+                    }
+                }
+
+                // å¤–å´ã®ä¼šè©±ãŒçµ‚äº†ã—ãŸå ´åˆ
+                if (quoteStack.Count == 0)
+                {
+                    result.Add(current.Trim());
+                    current = "";
+                }
+
+                continue;
+            }
+
+            // ä¼šè©±ã®å¤–å´ã«ã‚ã‚‹å¥èª­ç‚¹ã§æ–‡ç« ã‚’åˆ†å‰²
+            if (quoteStack.Count == 0 &&
+                (character == 'ã€‚' ||
+                 character == 'ï¼' ||
+                 character == 'ï¼Ÿ' ||
+                 character == '!' ||
+                 character == '?'))
+            {
+                result.Add(current.Trim());
+                current = "";
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(current))
+        {
+            result.Add(current.Trim());
         }
 
         return result;
@@ -211,7 +260,7 @@ public class ScenarioManager : MonoBehaviour
         string candidateText =
             currentPageText + separator + currentSentence;
 
-        // •¶Í‚ğ’Ç‰Á‚µ‚½ê‡‚Éƒy[ƒW‚ª‘‚¦‚é‚©Šm”F
+        // æ–‡ç« ã‚’è¿½åŠ ã—ãŸå ´åˆã«ãƒšãƒ¼ã‚¸ãŒå¢—ãˆã‚‹ã‹ç¢ºèª
         scenarioText.text = candidateText;
         scenarioText.ForceMeshUpdate();
 
@@ -275,7 +324,7 @@ public class ScenarioManager : MonoBehaviour
             scenarioText.text = pagePrefix + candidate;
             scenarioText.ForceMeshUpdate();
 
-            // ƒy[ƒW‚©‚ç‚Í‚İo‚·’¼‘O‚Å’â~
+            // ãƒšãƒ¼ã‚¸ã‹ã‚‰ã¯ã¿å‡ºã™ç›´å‰ã§åœæ­¢
             if (scenarioText.textInfo.pageCount > 1)
             {
                 scenarioText.text = pagePrefix + visibleText;
@@ -328,7 +377,7 @@ public class ScenarioManager : MonoBehaviour
             ? ""
             : currentPageText + "\n\n";
 
-        // ƒNƒŠƒbƒN‚³‚ê‚½‚çA•\¦‚Å‚«‚é”ÍˆÍ‚Ü‚Åˆê‹C‚É•\¦‚·‚é
+        // ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‚‰ã€è¡¨ç¤ºã§ãã‚‹ç¯„å›²ã¾ã§ä¸€æ°—ã«è¡¨ç¤ºã™ã‚‹
         while (currentCharacterIndex < currentSentence.Length)
         {
             char nextCharacter =
@@ -339,7 +388,7 @@ public class ScenarioManager : MonoBehaviour
             scenarioText.text = pagePrefix + candidate;
             scenarioText.ForceMeshUpdate();
 
-            // ƒy[ƒW‚ğ’´‚¦‚éê‡‚ÍA‚»‚±‚Å~‚ß‚é
+            // ãƒšãƒ¼ã‚¸ã‚’è¶…ãˆã‚‹å ´åˆã¯ã€ãã“ã§æ­¢ã‚ã‚‹
             if (scenarioText.textInfo.pageCount > 1)
             {
                 scenarioText.text = pagePrefix + visibleText;
@@ -356,7 +405,7 @@ public class ScenarioManager : MonoBehaviour
             currentCharacterIndex++;
         }
 
-        // ˆê•¶‚ğÅŒã‚Ü‚Å•\¦‚Å‚«‚½ê‡
+        // ä¸€æ–‡ã‚’æœ€å¾Œã¾ã§è¡¨ç¤ºã§ããŸå ´åˆ
         currentPageText += pagePrefix == ""
             ? visibleText
             : "\n\n" + visibleText;
@@ -465,38 +514,30 @@ public class ScenarioManager : MonoBehaviour
 
     private void ContinueToNextNode()
     {
-        if (currentNode == null ||
-            currentNode.choices == null)
+        if (currentNode == null)
             return;
 
-        foreach (ScenarioChoice choice in currentNode.choices)
+        // ClickToContinueã®å ´åˆã¯ScenarioNodeã®Next Node IDã‚’ä½¿ç”¨
+        if (currentNode.progressType == NodeProgressType.ClickToContinue)
         {
-            if (choice == null)
-                continue;
-
-            bool conditionsMet = true;
-
-            if (choice.requiredFlags != null)
+            if (string.IsNullOrWhiteSpace(currentNode.nextNodeID))
             {
-                foreach (string requiredFlag in choice.requiredFlags)
-                {
-                    if (!flagManager.HasFlag(requiredFlag))
-                    {
-                        conditionsMet = false;
-                        break;
-                    }
-                }
-            }
+                Debug.LogError(
+                    currentNode.nodeID +
+                    "ï¼šã‚¯ãƒªãƒƒã‚¯å¾Œã®ç§»å‹•å…ˆï¼ˆNext Node IDï¼‰ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚",
+                    currentNode
+                );
 
-            if (conditionsMet)
-            {
-                LoadNode(choice.nextNodeID);
+                waitingForClick = false;
                 return;
             }
+
+            LoadNode(currentNode.nextNodeID);
+            return;
         }
 
-        Debug.Log(
-            "Ÿ‚Öi‚ß‚é‘I‘ğˆ‚ª‚ ‚è‚Ü‚¹‚ñ: " +
+        Debug.LogWarning(
+            "ClickToContinueä»¥å¤–ã®ãƒãƒ¼ãƒ‰ã‹ã‚‰æ¬¡ã¸é€²ã‚‚ã†ã¨ã—ã¾ã—ãŸ: " +
             currentNode.nodeID
         );
     }

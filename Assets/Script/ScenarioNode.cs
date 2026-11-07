@@ -33,6 +33,9 @@ public class ScenarioNode : ScriptableObject
     [Header("文章を読み終えた後の動作")]
     public NodeProgressType progressType = NodeProgressType.Choices;
 
+    [Header("クリック後に進むノード（ClickToContinue用）")]
+    public string nextNodeID;
+
     [Header("選択肢")]
     public List<ScenarioChoice> choices = new List<ScenarioChoice>();
 
@@ -54,6 +57,21 @@ public class ScenarioNode : ScriptableObject
             hasError = true;
         }
 
+        // ClickToContinueの移動先を検査
+        if (progressType == NodeProgressType.ClickToContinue && !isEnding)
+        {
+            if (string.IsNullOrWhiteSpace(nextNodeID))
+            {
+                Debug.LogError(
+                    nodeID + "：ClickToContinueの移動先（Next Node ID）が空欄です。",
+                    this
+                );
+
+                hasError = true;
+            }
+        }
+
+        // Choicesの設定を検査
         if (progressType == NodeProgressType.Choices &&
             (choices == null || choices.Count == 0))
         {
@@ -113,4 +131,3 @@ public class ScenarioNode : ScriptableObject
         }
     }
 }
-

@@ -418,7 +418,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "B.\u64CD\u7E26\u5BA4\u3078\u884C\u304F\n"
+  m_text: B
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
   m_sharedMaterial: {fileID: 26223763623801863, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
@@ -427,8 +427,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -550,7 +550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.6509804}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -684,7 +684,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -755,6 +755,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodes:
   - {fileID: 11400000, guid: 9201251a16abde04284eef80d904a163, type: 2}
+  - {fileID: 11400000, guid: 7b997eb1e0c060e4783371b46906d1dc, type: 2}
+  - {fileID: 11400000, guid: f6f2a71eb9413624f84e7c2f237e97f5, type: 2}
+  - {fileID: 11400000, guid: 0fe744d0b3b799541a3afa520f0935cb, type: 2}
+  - {fileID: 11400000, guid: 2a2ac2ab1e5af654b98905593a495d08, type: 2}
+  - {fileID: 11400000, guid: 02aff93427a801b44b4e75d760e1ee4b, type: 2}
+  - {fileID: 11400000, guid: e94ba0f722004594c86bebdb7b083772, type: 2}
+  - {fileID: 11400000, guid: f765779e150480d4683246f6e7dbe3d8, type: 2}
+  - {fileID: 11400000, guid: 04e755a4b8b1e2543aba6b62e967a739, type: 2}
+  - {fileID: 11400000, guid: 9f7f09b7992331f49a8b445324ac1e1a, type: 2}
+  - {fileID: 11400000, guid: 11178fd585f335b4985f9dec04a9944a, type: 2}
+  - {fileID: 11400000, guid: 7dd9bc25037e48e48b79c83a715c4639, type: 2}
+  - {fileID: 11400000, guid: 8fead503274c80d488e9034a944798dd, type: 2}
+  - {fileID: 11400000, guid: 59e6c717b8a912e41af7c3c2440c6bc2, type: 2}
+  - {fileID: 11400000, guid: ed9c2d1cee0953942807080c72d9abd7, type: 2}
+  - {fileID: 11400000, guid: fc8fe1fd894525949a75c9b682a7ae35, type: 2}
+  - {fileID: 11400000, guid: 902a50502a1567948b8b1d9a3d2cd4b5, type: 2}
+  - {fileID: 11400000, guid: 2b9f34237c94c244fb812f5aa0633648, type: 2}
+  - {fileID: 11400000, guid: 7985207345e51ff48be908182f2dad45, type: 2}
+  - {fileID: 11400000, guid: b95bbda4eae3c7545967e274ecefdd76, type: 2}
   flagManager: {fileID: 1683181879}
 --- !u!4 &422417663
 Transform:
@@ -1401,7 +1420,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "C.\u81EA\u5BA4\u306B\u623B\u308B\n"
+  m_text: 'C
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
   m_sharedMaterial: {fileID: 26223763623801863, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
@@ -1410,8 +1431,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1673,7 +1694,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "A.\u98DF\u5802\u306B\u884C\u304F"
+  m_text: A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
   m_sharedMaterial: {fileID: 26223763623801863, guid: ff0b56a378f142849b82b6cc7e383d38, type: 2}
@@ -1682,8 +1703,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
