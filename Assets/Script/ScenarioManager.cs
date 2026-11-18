@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 public class ScenarioManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class ScenarioManager : MonoBehaviour
     [SerializeField] private TMP_Text choiceAText;
     [SerializeField] private TMP_Text choiceBText;
     [SerializeField] private TMP_Text choiceCText;
+    [SerializeField] private TMP_Text choiceDText;
 
     [Header("データ")]
     [SerializeField] private ScenarioDatabase database;
@@ -40,14 +42,19 @@ public class ScenarioManager : MonoBehaviour
 
     private string currentPageText = "";
     private string currentSentence = "";
+    private string currentNodeText = "";
 
     private bool isTyping;
     private bool waitingForClick;
     private bool waitingForNextPage;
 
+    private bool waitingForMouseRelease;
+
     private float lastClickTime = -999f;
 
     private Coroutine typingCoroutine;
+    private Coroutine choiceButtonCoroutine;
+    private bool choicesReady;
 
     private void Start()
     {
@@ -57,10 +64,25 @@ public class ScenarioManager : MonoBehaviour
 
     private void Update()
     {
+        // ロード直後、マウスボタンが離されるまで入力を受け付けない
+        if (waitingForMouseRelease)
+        {
+            if (Input.GetMouseButton(0))
+                return;
+
+            waitingForMouseRelease = false;
+            return;
+        }
+
         if (choicePanel.activeSelf)
             return;
 
         if (!Input.GetMouseButtonDown(0))
+            return;
+
+        // UIをクリックした場合はシナリオを進めない
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
             return;
 
         // クリック連打による連続進行を防止
@@ -114,6 +136,14 @@ public class ScenarioManager : MonoBehaviour
     {
         StopTyping();
 
+        if (choiceButtonCoroutine != null)
+        {
+            StopCoroutine(choiceButtonCoroutine);
+            choiceButtonCoroutine = null;
+        }
+
+        choicesReady = false;
+
         currentNode = database.GetNode(nodeID);
 
         if (currentNode == null)
@@ -124,12 +154,12 @@ public class ScenarioManager : MonoBehaviour
 
         bool isFirstVisit = visitedNodes.Add(nodeID);
 
-        string textToDisplay = currentNode.text;
+        currentNodeText = currentNode.text;
 
         if (!isFirstVisit &&
             !string.IsNullOrEmpty(currentNode.revisitText))
         {
-            textToDisplay = currentNode.revisitText;
+            currentNodeText = currentNode.revisitText;
         }
 
         if (!string.IsNullOrEmpty(currentNode.setFlag))
@@ -149,7 +179,7 @@ public class ScenarioManager : MonoBehaviour
         }
 
         sentences.Clear();
-        sentences.AddRange(SplitIntoSentences(textToDisplay));
+        sentences.AddRange(SplitIntoSentences(currentNodeText));
 
         currentSentenceIndex = 0;
         currentCharacterIndex = 0;
@@ -187,23 +217,18 @@ public class ScenarioManager : MonoBehaviour
         {
             current += character;
 
-            // 括弧の開始
-            if (character == '「' ||
-                character == '『')
+            if (character == '「' || character == '『')
             {
                 quoteStack.Push(character);
                 continue;
             }
 
-            // 括弧の終了
-            if (character == '」' ||
-                character == '』')
+            if (character == '」' || character == '』')
             {
                 if (quoteStack.Count > 0)
                 {
                     char openingQuote = quoteStack.Peek();
 
-                    // 対応する閉じ括弧の場合だけ閉じる
                     if ((openingQuote == '「' && character == '」') ||
                         (openingQuote == '『' && character == '』'))
                     {
@@ -211,7 +236,6 @@ public class ScenarioManager : MonoBehaviour
                     }
                 }
 
-                // 外側の会話が終了した場合
                 if (quoteStack.Count == 0)
                 {
                     result.Add(current.Trim());
@@ -221,7 +245,6 @@ public class ScenarioManager : MonoBehaviour
                 continue;
             }
 
-            // 会話の外側にある句読点で文章を分割
             if (quoteStack.Count == 0 &&
                 (character == '。' ||
                  character == '！' ||
@@ -260,7 +283,6 @@ public class ScenarioManager : MonoBehaviour
         string candidateText =
             currentPageText + separator + currentSentence;
 
-        // 文章を追加した場合にページが増えるか確認
         scenarioText.text = candidateText;
         scenarioText.ForceMeshUpdate();
 
@@ -308,7 +330,9 @@ public class ScenarioManager : MonoBehaviour
 
     private IEnumerator TypeSentence()
     {
-        string visibleText = "";
+        // セーブデータから復元した場合も、表示済み文字を維持する
+        string visibleText =
+            currentSentence.Substring(0, currentCharacterIndex);
 
         while (currentCharacterIndex < currentSentence.Length)
         {
@@ -324,7 +348,6 @@ public class ScenarioManager : MonoBehaviour
             scenarioText.text = pagePrefix + candidate;
             scenarioText.ForceMeshUpdate();
 
-            // ページからはみ出す直前で停止
             if (scenarioText.textInfo.pageCount > 1)
             {
                 scenarioText.text = pagePrefix + visibleText;
@@ -377,7 +400,6 @@ public class ScenarioManager : MonoBehaviour
             ? ""
             : currentPageText + "\n\n";
 
-        // クリックされたら、表示できる範囲まで一気に表示する
         while (currentCharacterIndex < currentSentence.Length)
         {
             char nextCharacter =
@@ -388,7 +410,6 @@ public class ScenarioManager : MonoBehaviour
             scenarioText.text = pagePrefix + candidate;
             scenarioText.ForceMeshUpdate();
 
-            // ページを超える場合は、そこで止める
             if (scenarioText.textInfo.pageCount > 1)
             {
                 scenarioText.text = pagePrefix + visibleText;
@@ -405,7 +426,6 @@ public class ScenarioManager : MonoBehaviour
             currentCharacterIndex++;
         }
 
-        // 一文を最後まで表示できた場合
         currentPageText += pagePrefix == ""
             ? visibleText
             : "\n\n" + visibleText;
@@ -484,6 +504,7 @@ public class ScenarioManager : MonoBehaviour
         choiceAText.gameObject.SetActive(false);
         choiceBText.gameObject.SetActive(false);
         choiceCText.gameObject.SetActive(false);
+        choiceDText.gameObject.SetActive(false);
 
         if (availableChoices.Count == 0)
         {
@@ -509,7 +530,56 @@ public class ScenarioManager : MonoBehaviour
             choiceCText.gameObject.SetActive(true);
         }
 
+        if (availableChoices.Count >= 4)
+        {
+            choiceDText.text = availableChoices[3].choiceText;
+            choiceDText.gameObject.SetActive(true);
+        }
+
+        SetChoiceButtonsInteractable(false);
+        choicesReady = false;
+
         choicePanel.SetActive(true);
+
+        choiceButtonCoroutine =
+            StartCoroutine(EnableChoiceButtonsAfterDelay());
+    }
+
+    private IEnumerator EnableChoiceButtonsAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(0.3f);
+
+        if (choicePanel.activeSelf)
+        {
+            SetChoiceButtonsInteractable(true);
+            choicesReady = true;
+        }
+
+        choiceButtonCoroutine = null;
+    }
+
+    private void SetChoiceButtonsInteractable(bool interactable)
+    {
+        SetChoiceButtonInteractable(choiceAText, interactable);
+        SetChoiceButtonInteractable(choiceBText, interactable);
+        SetChoiceButtonInteractable(choiceCText, interactable);
+        SetChoiceButtonInteractable(choiceDText, interactable);
+    }
+
+    private void SetChoiceButtonInteractable(
+        TMP_Text choiceText,
+        bool interactable)
+    {
+        if (choiceText == null)
+            return;
+
+        Button button = choiceText.GetComponentInParent<Button>();
+
+        if (button != null)
+        {
+            button.interactable =
+                interactable && choiceText.gameObject.activeSelf;
+        }
     }
 
     private void ContinueToNextNode()
@@ -517,7 +587,6 @@ public class ScenarioManager : MonoBehaviour
         if (currentNode == null)
             return;
 
-        // ClickToContinueの場合はScenarioNodeのNext Node IDを使用
         if (currentNode.progressType == NodeProgressType.ClickToContinue)
         {
             if (string.IsNullOrWhiteSpace(currentNode.nextNodeID))
@@ -544,10 +613,150 @@ public class ScenarioManager : MonoBehaviour
 
     public void SelectChoice(int choiceIndex)
     {
+        if (!choicesReady || !choicePanel.activeSelf)
+            return;
+
         if (choiceIndex < 0 ||
             choiceIndex >= availableChoices.Count)
             return;
 
         LoadNode(availableChoices[choiceIndex].nextNodeID);
+    }
+
+    // ==========================================
+    // セーブ機能
+    // ==========================================
+
+    public SaveData CreateSaveData(int slotIndex)
+    {
+        if (currentNode == null)
+        {
+            Debug.LogError("現在のノードが存在しないためセーブできません。");
+            return null;
+        }
+
+        SaveData data = new SaveData();
+
+        data.slotIndex = slotIndex;
+        data.currentNodeID = currentNode.nodeID;
+
+        data.currentSentenceIndex = currentSentenceIndex;
+        data.currentCharacterIndex = currentCharacterIndex;
+
+        data.currentPageText = currentPageText;
+        data.currentSentence = currentSentence;
+        data.nodeText = currentNodeText;
+
+        data.displayedText = scenarioText.text;
+
+        data.isTyping = isTyping;
+        data.waitingForClick = waitingForClick;
+        data.waitingForNextPage = waitingForNextPage;
+
+        data.choicesVisible = choicePanel.activeSelf;
+
+        data.activeFlags = flagManager.GetProgressFlagsForSave();
+
+        data.visitedNodes = new List<string>(visitedNodes);
+
+        return data;
+    }
+
+    // ==========================================
+    // ロード機能
+    // ==========================================
+
+    public void RestoreSaveData(SaveData data)
+    {
+        if (data == null)
+        {
+            Debug.LogError("ロードするデータがありません。");
+            return;
+        }
+
+        StopTyping();
+
+        if (choiceButtonCoroutine != null)
+        {
+            StopCoroutine(choiceButtonCoroutine);
+            choiceButtonCoroutine = null;
+        }
+
+        choicesReady = false;
+
+        currentNode = database.GetNode(data.currentNodeID);
+
+        if (currentNode == null)
+        {
+            Debug.LogError("ロード先のノードが見つかりません: " + data.currentNodeID);
+            return;
+        }
+
+        // フラグを復元
+        flagManager.LoadProgressFlags(data.activeFlags);
+
+        // 訪問済みノードを復元
+        visitedNodes.Clear();
+
+        if (data.visitedNodes != null)
+        {
+            foreach (string nodeID in data.visitedNodes)
+            {
+                visitedNodes.Add(nodeID);
+            }
+        }
+
+        // 現在のノード文章を復元
+        currentNodeText = data.nodeText;
+
+        sentences.Clear();
+        sentences.AddRange(SplitIntoSentences(currentNodeText));
+
+        // 文章の表示位置を復元
+        currentSentenceIndex = Mathf.Clamp(
+            data.currentSentenceIndex,
+            0,
+            sentences.Count
+        );
+
+        currentCharacterIndex = Mathf.Max(
+            0,
+            data.currentCharacterIndex
+        );
+
+        currentPageText = data.currentPageText;
+        currentSentence = data.currentSentence;
+
+        // 表示状態を復元
+        scenarioText.text = data.displayedText;
+        scenarioText.pageToDisplay = 1;
+        scenarioText.ForceMeshUpdate();
+
+        isTyping = data.isTyping;
+        waitingForClick = data.waitingForClick;
+        waitingForNextPage = data.waitingForNextPage;
+
+        choicePanel.SetActive(false);
+
+        // 選択肢表示中だった場合
+        if (data.choicesVisible)
+        {
+            isTyping = false;
+            waitingForClick = false;
+            waitingForNextPage = false;
+
+            ShowChoices();
+        }
+        else if (isTyping)
+        {
+            // タイピング途中なら残りの文字を表示する処理を再開
+            typingCoroutine = StartCoroutine(TypeSentence());
+        }
+
+        // ロード直後の誤クリック防止
+        waitingForMouseRelease = true;
+        lastClickTime = Time.unscaledTime;
+
+        Debug.Log("セーブデータをロードしました: " + data.currentNodeID);
     }
 }

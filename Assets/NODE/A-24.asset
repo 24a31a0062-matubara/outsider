@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9dbd2704aa23564494b59df880db035, type: 3}
+  m_Name: A-24
+  m_EditorClassIdentifier: 
+  nodeID: A-24
+  text: "\u7FCC\u671D\u3002\r\n\r\n\u30A6\u30A3\u30EA\u30A2\u30E0\u300C\u3046\u30FC\u3093\u3002\u4ECA\u65E5\u306F\u65E9\u3081\u306B\u8D77\u304D\u308C\u305F\u306A\u3002\u300D\r\n\r\n\u30AC\u30C1\u30E3\r\n\r\n\u30C6\u30C7\u30A3\u300C\u3082\u3046\u8D77\u304D\u3066\u305F\u304B\u3002\u300D\r\n\r\n\u30C6\u30C7\u30A3\u300C\u3059\u3050\u51FA\u308B\u305E\u3002\u300D\r\n\r\n\u30A6\u30A3\u30EA\u30A2\u30E0\u300C\u4ECA\u65E5\u306F\u65E9\u304B\u3063\u305F\u308D\uFF1F\u300D\r\n\r\n\u30C6\u30C7\u30A3\u300C\u3044\u3044\u3084\u3002\u9045\u304B\u3063\u305F\u3002\u300D\r\n\r\n\u30C6\u30C7\u30A3\u300C\u307E\u305F\u6B7B\u4F53\u304C\u6319\u304C\u3063\u305F\u3002\u300D\r\n"
+  revisitText: 
+  progressType: 1
+  nextNodeID: A-25
+  choices: []
+  setFlag: 
+  isEnding: 0
+  endingFlag: EndingASeen

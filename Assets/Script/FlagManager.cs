@@ -6,16 +6,16 @@ public class FlagManager : MonoBehaviour
     [Header("使用を許可するフラグ名")]
     [SerializeField]
     private List<string> registeredFlags = new List<string>()
-{
-"VisitedDining",
-"FoundPanelRecord",
-"HeardAlibi",
-"EndingASeen",
-"EndingBSeen",
-"TrueEndingSeen"
-};
+    {
+        "VisitedDining",
+        "FoundPanelRecord",
+        "HeardAlibi",
+        "EndingASeen",
+        "EndingBSeen",
+        "TrueEndingSeen"
+    };
 
-private HashSet<string> flags = new HashSet<string>();
+    private HashSet<string> flags = new HashSet<string>();
     private HashSet<string> registeredFlagSet;
 
     private const string EndingPrefix = "NOEx_Ending_";
@@ -85,6 +85,49 @@ private HashSet<string> flags = new HashSet<string>();
         Debug.Log("フラグOFF: " + flagName);
     }
 
+    // セーブ用：エンディング記録以外のフラグを取得
+    public List<string> GetProgressFlagsForSave()
+    {
+        List<string> savedFlags = new List<string>();
+
+        foreach (string flag in flags)
+        {
+            if (!IsEndingFlag(flag))
+            {
+                savedFlags.Add(flag);
+            }
+        }
+
+        return savedFlags;
+    }
+
+    // ロード用：進行状況フラグを復元
+    // エンディング記録は変更しない
+    public void LoadProgressFlags(List<string> savedFlags)
+    {
+        if (savedFlags == null)
+            return;
+
+        // 現在の進行状況フラグをすべて解除
+        flags.RemoveWhere(flag => !IsEndingFlag(flag));
+
+        // セーブデータの進行状況フラグを復元
+        foreach (string flag in savedFlags)
+        {
+            if (IsRegistered(flag) && !IsEndingFlag(flag))
+            {
+                flags.Add(flag);
+            }
+        }
+
+        Debug.Log("進行状況フラグをロードしました。");
+    }
+
+    public void RemoveAllProgressFlags()
+    {
+        flags.RemoveWhere(flag => !IsEndingFlag(flag));
+    }
+
     private bool IsEndingFlag(string flagName)
     {
         return flagName == "EndingASeen"
@@ -105,7 +148,7 @@ private HashSet<string> flags = new HashSet<string>();
             Debug.LogError("未登録のフラグ名です: " + flagName);
             return false;
         }
+
         return true;
     }
-
 }
